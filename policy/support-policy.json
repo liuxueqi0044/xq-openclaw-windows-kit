@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "canonicalBoundary": "manifest/product-config.json#/productBoundary",
+  "supportChannel": "written-only",
+  "intake": { "enforcement": "allow-only-data-listed-in-canonical-boundary" },
+  "remoteSupport": { "includedInSelfServiceSku": false, "requiresSeparateSkuAndSop": true }
+}

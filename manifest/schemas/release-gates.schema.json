@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xq.example.invalid/schemas/release-gates.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "defaultFailureAction", "gates"],
+  "properties": { "schemaVersion": { "const": 1 }, "defaultFailureAction": { "const": "block-release" }, "gates": { "type": "array", "minItems": 9, "maxItems": 9, "items": { "$ref": "#/$defs/gate" } } },
+  "$defs": { "gate": { "type": "object", "additionalProperties": false, "required": ["id", "name", "required", "onFailure"], "properties": { "id": { "pattern": "^G[1-9]$" }, "name": { "type": "string", "minLength": 1 }, "required": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "onFailure": { "enum": ["return-m0", "reject-build", "reject-listing", "reject-release", "do-not-upload-candidate", "do-not-list", "pause-delivery"] } } } }
+}

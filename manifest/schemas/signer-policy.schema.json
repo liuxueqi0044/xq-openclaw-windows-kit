@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xq.example.invalid/schemas/signer-policy.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "approvedRepository", "releaseInput", "installerVerification", "licenseVerification", "unknownStateAction"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "approvedRepository": { "type": "object", "additionalProperties": false, "required": ["owner", "name", "repositoryId"], "properties": { "owner": { "const": "openclaw" }, "name": { "const": "openclaw" }, "repositoryId": { "const": 1103012935 } } },
+    "releaseInput": { "type": "object", "additionalProperties": false, "required": ["approvedLockRequired", "allowLatestAlias", "draftAllowed", "prereleaseAllowed"], "properties": { "approvedLockRequired": { "const": true }, "allowLatestAlias": { "const": false }, "draftAllowed": { "const": false }, "prereleaseAllowed": { "const": false } } },
+    "installerVerification": { "type": "object", "additionalProperties": false, "required": ["lockHashRequired", "officialChecksumRequired", "authenticodeStatus", "lockSubjectRequired", "lockThumbprintRequired", "timestampRequired", "chainRequired"], "properties": { "lockHashRequired": { "const": true }, "officialChecksumRequired": { "const": true }, "authenticodeStatus": { "const": "Valid" }, "lockSubjectRequired": { "const": true }, "lockThumbprintRequired": { "const": true }, "timestampRequired": { "const": true }, "chainRequired": { "const": true } } },
+    "licenseVerification": { "type": "object", "additionalProperties": false, "required": ["fixedCommitRequired", "files", "apiLicenseMetadataIsSufficient"], "properties": { "fixedCommitRequired": { "const": true }, "files": { "const": ["LICENSE", "THIRD_PARTY_NOTICES.md"] }, "apiLicenseMetadataIsSufficient": { "const": false } } },
+    "unknownStateAction": { "const": "block-release" }
+  }
+}

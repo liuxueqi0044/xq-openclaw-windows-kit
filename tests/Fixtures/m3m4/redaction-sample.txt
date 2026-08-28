@@ -1,0 +1,5 @@
+Authorization: Bearer fixture-bearer-123456789
+Basic ZmljdHVyZS1wYXNzd29yZC0xMjM0NTY=
+https://user:fixture-password@example.invalid/api?token=fixture-token-123456789
+JWT eyJhbGciOiJIUzI1NiJ9.fixture-payload.fixture-signature
+normal version 0.6.12 path C:\Program Files\OpenClaw error code E_FAIL

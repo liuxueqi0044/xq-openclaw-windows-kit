@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "productId": "xq-openclaw-windows-kit",
+  "productVersion": "0.1.0",
+  "supportedOs": [
+    "Windows 11 x64"
+  ],
+  "primaryInstallMode": "windows-hub-local-managed-wsl",
+  "diagnosticReportVersion": 1,
+  "licenseNotice": "XQ content and upstream licenses are tracked separately.",
+  "policyDefaults": {
+    "unknownState": "unverified",
+    "unknownOfficialPrerequisiteAction": "block-release",
+    "failClosed": true
+  },
+  "productBoundary": {
+    "productName": "XQ Windows 配置与排错资料包（适用于 OpenClaw）",
+    "relationshipStatement": "XQ is an independent configuration and troubleshooting materials provider; it is not OpenClaw, its installer publisher, or an authorized representative.",
+    "included": [
+      "Offline Chinese guidance for the approved Windows 11 x64 Hub local setup path",
+      "Distribution of an unmodified, verified official installer only after release gates pass",
+      "Read-only, redacted diagnostic reporting",
+      "Integrity help, damaged-file resend, and one scope-limited written clarification"
+    ],
+    "excluded": [
+      "Storage, entry, recovery, or transmission of model credentials, passwords, cookies, or API keys",
+      "Remote control, remote support, SSH tunneling, or unattended access",
+      "Automatic repair, system modification, plugin installation, permission expansion, or startup configuration",
+      "Model-provider fees, token allocation, guaranteed compatibility, perpetual updates, or official authorization"
+    ],
+    "customerDataAllowedForSupport": [
+      "A user-reviewed redacted diagnostic report",
+      "Non-sensitive order and package-version information"
+    ],
+    "customerDataNeverRequested": [
+      "API keys",
+      "passwords",
+      "cookies",
+      "tokens",
+      "remote-control credentials",
+      "full configuration files",
+      "chat or session content"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3 官方 Hub 本地设置</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body><main>
+  <header>
+    <p class="meta">XQ v0.1.0　|　上游版本：以包内来源证明为准</p>
+    <h1>第 3 步：在官方 Hub 做本地设置</h1>
+    <nav><a href="02-安装官方Hub.html">上一步</a><a href="00-开始这里.html">总览</a><a href="04-配置凭据与测试.html">下一步</a></nav>
+  </header>
+  <h2>推荐路径</h2>
+  <p>在官方 Hub 中选择<strong>本地设置</strong>。这是 XQ 首版唯一完整验收的路径：官方 Hub 创建并管理默认的 <code>OpenClawGateway</code> WSL Gateway。</p>
+  <ol>
+    <li>打开官方 Hub 的本地设置入口，按其提示启用 WSL2/虚拟化。</li>
+    <li>允许官方 Hub 创建默认 WSL 发行版；不要手动改名、迁移或复制 Gateway 文件。</li>
+    <li>进入 Capabilities/Settings 时，先按<a href="能力与最小权限.html">能力与最小权限</a>选择低风险配置，再等待 Hub 显示 Gateway 已就绪。</li>
+  </ol>
+  <div class="ok"><strong>成功标志：</strong>Hub 显示本地 Gateway 可用，或能继续到模型配置界面。首次创建可能较慢；不要重复点击安装或强制关闭窗口。</div>
+  <div class="warning"><strong>开机启动边界：</strong>XQ 不会自行添加开机启动、计划任务或隐藏服务。若用户在官方 OpenClaw 界面主动开启官方后台组件，那是官方组件行为，不是 XQ 创建的服务。</div>
+  <h2>不要做的事</h2>
+  <ul>
+    <li>不要以管理员身份打开终端来“修复” WSL。</li>
+    <li>不要把完整配置、会话目录或浏览器数据复制给售后。</li>
+    <li>不要安装第三方插件、Skill、远程 Gateway 或 SSH 隧道来绕过本地设置。</li>
+  </ul>
+  <footer>失败时记录 Hub 页面给出的简短提示，转到<a href="FAQ.html">常见问题</a>或<a href="诊断.html">只读诊断</a>。</footer>
+</main></body>
+</html>

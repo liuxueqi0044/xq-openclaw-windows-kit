@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xq.example.invalid/schemas/support-policy.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "canonicalBoundary", "supportChannel", "intake", "remoteSupport"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "canonicalBoundary": { "const": "manifest/product-config.json#/productBoundary" },
+    "supportChannel": { "const": "written-only" },
+    "intake": { "type": "object", "additionalProperties": false, "required": ["enforcement"], "properties": { "enforcement": { "const": "allow-only-data-listed-in-canonical-boundary" } } },
+    "remoteSupport": { "type": "object", "additionalProperties": false, "required": ["includedInSelfServiceSku", "requiresSeparateSkuAndSop"], "properties": { "includedInSelfServiceSku": { "const": false }, "requiresSeparateSkuAndSop": { "const": true } } }
+  }
+}

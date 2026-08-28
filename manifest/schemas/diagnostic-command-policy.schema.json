@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xq.example.invalid/schemas/diagnostic-command-policy.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "mode", "defaultCommandTimeoutSeconds", "forbiddenTokens", "commands", "readAccess"],
+  "properties": {
+    "schemaVersion": { "const": 1 }, "mode": { "const": "read-only" }, "defaultCommandTimeoutSeconds": { "type": "integer", "minimum": 15, "maximum": 30 },
+    "forbiddenTokens": { "type": "array", "minItems": 6, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z-]+$" } },
+    "commands": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/command" } },
+    "readAccess": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+  },
+  "$defs": {
+    "command": {
+      "type": "object", "additionalProperties": false, "required": ["id", "executable", "arguments", "executionContext"],
+      "properties": { "id": { "type": "string", "pattern": "^[a-z0-9-]+$" }, "executable": { "type": "string", "minLength": 1 }, "arguments": { "type": "array", "items": { "type": "string" } }, "executionContext": { "enum": ["windows-host", "managed-wsl-openclaw-user", "native-cli-if-present"] } },
+      "allOf": [
+        {
+          "if": { "properties": { "id": { "const": "wsl-running-list" } }, "required": ["id"] },
+          "then": {
+            "properties": {
+              "executable": { "const": "wsl.exe" },
+              "arguments": { "const": ["--list", "--running", "--quiet"] },
+              "executionContext": { "const": "windows-host" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

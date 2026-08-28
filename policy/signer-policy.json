@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "approvedRepository": { "owner": "openclaw", "name": "openclaw", "repositoryId": 1103012935 },
+  "releaseInput": { "approvedLockRequired": true, "allowLatestAlias": false, "draftAllowed": false, "prereleaseAllowed": false },
+  "installerVerification": { "lockHashRequired": true, "officialChecksumRequired": true, "authenticodeStatus": "Valid", "lockSubjectRequired": true, "lockThumbprintRequired": true, "timestampRequired": true, "chainRequired": true },
+  "licenseVerification": { "fixedCommitRequired": true, "files": ["LICENSE", "THIRD_PARTY_NOTICES.md"], "apiLicenseMetadataIsSufficient": false },
+  "unknownStateAction": "block-release"
+}

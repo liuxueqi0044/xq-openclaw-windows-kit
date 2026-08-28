@@ -1,0 +1,2 @@
+  NAME               STATE           VERSION
+* OpenClawGateway    Stopped         2

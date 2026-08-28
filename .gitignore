@@ -1,0 +1,14 @@
+dist/
+staging/
+downloads/
+artifacts/
+tools/reports/
+TestResults/
+testResults*.xml
+*.trx
+*.log
+*.tmp
+*.bak
+.env
+.env.*
+candidate-lock.json

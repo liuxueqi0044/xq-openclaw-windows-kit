@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xq.example.invalid/schemas/provenance.schema.json",
+  "title": "Package source and version provenance",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "productVersion", "gitCommit", "builtAtUtc", "builderVersion", "upstream", "installer", "sourceFiles", "automatedTests"],
+  "properties": {
+    "schemaVersion": { "const": 1 }, "productVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }, "gitCommit": { "type": "string", "pattern": "^[A-Fa-f0-9]{40}$" }, "builtAtUtc": { "type": "string", "format": "date-time" }, "builderVersion": { "type": "string", "minLength": 1 },
+    "upstream": { "type": "object", "additionalProperties": false, "required": ["repository", "tag", "releaseId"], "properties": { "repository": { "const": "openclaw/openclaw" }, "tag": { "type": "string", "minLength": 1 }, "releaseId": { "type": "integer", "minimum": 1 } } },
+    "installer": { "type": "object", "additionalProperties": false, "required": ["assetId", "size", "sha256", "officialChecksumMatched", "authenticode"], "properties": { "assetId": { "type": "integer", "minimum": 1 }, "size": { "type": "integer", "minimum": 1 }, "sha256": { "$ref": "#/$defs/sha256" }, "officialChecksumMatched": { "const": true }, "authenticode": { "type": "object", "additionalProperties": false, "required": ["status", "subject", "thumbprint", "timestampValid"], "properties": { "status": { "const": "Valid" }, "subject": { "type": "string", "minLength": 1 }, "thumbprint": { "type": "string", "pattern": "^[A-Fa-f0-9]{40}$" }, "timestampValid": { "const": true } } } } },
+    "sourceFiles": { "type": "object", "additionalProperties": false, "required": ["commitSha", "licenseSha256", "thirdPartyNoticesSha256"], "properties": { "commitSha": { "type": "string", "pattern": "^[A-Fa-f0-9]{40}$" }, "licenseSha256": { "$ref": "#/$defs/sha256" }, "thirdPartyNoticesSha256": { "$ref": "#/$defs/sha256" } } },
+    "automatedTests": { "type": "object", "additionalProperties": false, "required": ["passed", "summary"], "properties": { "passed": { "const": true }, "summary": { "type": "string", "minLength": 1 } } }
+  },
+  "$defs": { "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" } }
+}
