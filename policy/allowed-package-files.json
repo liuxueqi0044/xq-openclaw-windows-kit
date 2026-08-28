@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "packageRootName": "XQ-OpenClaw-Windows",
+  "allowedPaths": [
+    "OpenClawCompanion-Setup-x64.exe", "OpenClawCompanion-SHA256SUMS.txt", "LICENSE", "THIRD_PARTY_NOTICES.md",
+    "README.txt", "guide/*.html", "support/*.html", "assets/style.css", "tools/OpenClaw-XQ-Diagnose.ps1", "tools/XQ.Redaction.psm1", "tools/运行诊断工具.cmd",
+    "SOURCE-AND-VERSION.json", "SHA256SUMS.txt"
+  ],
+  "allowedExecutablePaths": ["OpenClawCompanion-Setup-x64.exe"]
+}

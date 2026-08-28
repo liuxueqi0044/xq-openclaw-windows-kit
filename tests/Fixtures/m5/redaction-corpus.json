@@ -1,0 +1,631 @@
+{
+  "schemaVersion": 1,
+  "description": "Synthetic only; every secret-shaped value is a non-functional test fixture.",
+  "cases": [
+    {
+      "id": "secret-001",
+      "classification": "secret",
+      "input": "apiKey=fixture-value-1-abcdefghijkl"
+    },
+    {
+      "id": "secret-002",
+      "classification": "secret",
+      "input": "access_token: fixture-value-2-abcdefghijkl"
+    },
+    {
+      "id": "secret-003",
+      "classification": "secret",
+      "input": "client-secret = fixture-value-3-abcdefghijkl"
+    },
+    {
+      "id": "secret-004",
+      "classification": "secret",
+      "input": "PASSWORD=fixture-value-4-abcdefghijkl"
+    },
+    {
+      "id": "secret-005",
+      "classification": "secret",
+      "input": "Authorization: Bearer fixtureBearer5abcdefghijkl"
+    },
+    {
+      "id": "secret-006",
+      "classification": "secret",
+      "input": "Basic Zml4dHVyZVVzZXI6Zml4dHVyZVBhc3M6"
+    },
+    {
+      "id": "secret-007",
+      "classification": "secret",
+      "input": "https://user7:password7@example.test/path"
+    },
+    {
+      "id": "secret-008",
+      "classification": "secret",
+      "input": "https://example.test/?api%5Fkey%3Dfixture8abcdefghijkl"
+    },
+    {
+      "id": "secret-009",
+      "classification": "secret",
+      "input": "https://example.test/?%61%70%69%5F%6B%65%79%3Dfixture9abcdefghijkl"
+    },
+    {
+      "id": "secret-010",
+      "classification": "secret",
+      "input": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmaXh0dXJl10In0.c2lnbmF0dXJlVmFsdWU"
+    },
+    {
+      "id": "secret-011",
+      "classification": "secret",
+      "input": "sk-proj-fixturetoken11abcdefghijklmnop"
+    },
+    {
+      "id": "secret-012",
+      "classification": "secret",
+      "input": "sk-ant-fixturetoken12abcdefghijklmnop"
+    },
+    {
+      "id": "secret-013",
+      "classification": "secret",
+      "input": "AIzaSyFixtureTokenValue13abcdefghijklmnop"
+    },
+    {
+      "id": "secret-014",
+      "classification": "secret",
+      "input": "ghp_fixturetoken14abcdefghijklmnop"
+    },
+    {
+      "id": "secret-015",
+      "classification": "secret",
+      "input": "github_pat_fixturetoken15abcdefghijklmnop"
+    },
+    {
+      "id": "secret-016",
+      "classification": "secret",
+      "input": "xoxb-fixturetoken16abcdefghijklmnop"
+    },
+    {
+      "id": "secret-017",
+      "classification": "secret",
+      "input": "C:\\Users\\FixtureUser17\\OpenClaw\\report.txt"
+    },
+    {
+      "id": "secret-018",
+      "classification": "secret",
+      "input": "gatewayToken: fixture-value-18-abcdefghijkl"
+    },
+    {
+      "id": "secret-019",
+      "classification": "secret",
+      "input": "multiLine\nrefresh_token=fixture-value-19-abcdefghijkl\nnext=line"
+    },
+    {
+      "id": "secret-020",
+      "classification": "secret",
+      "input": "apiKey=fixture-value-20-abcdefghijkl"
+    },
+    {
+      "id": "secret-021",
+      "classification": "secret",
+      "input": "access_token: fixture-value-21-abcdefghijkl"
+    },
+    {
+      "id": "secret-022",
+      "classification": "secret",
+      "input": "client-secret = fixture-value-22-abcdefghijkl"
+    },
+    {
+      "id": "secret-023",
+      "classification": "secret",
+      "input": "PASSWORD=fixture-value-23-abcdefghijkl"
+    },
+    {
+      "id": "secret-024",
+      "classification": "secret",
+      "input": "Authorization: Bearer fixtureBearer24abcdefghijkl"
+    },
+    {
+      "id": "secret-025",
+      "classification": "secret",
+      "input": "Basic Zml4dHVyZVVzZXI6Zml4dHVyZVBhc3M25"
+    },
+    {
+      "id": "secret-026",
+      "classification": "secret",
+      "input": "https://user26:password26@example.test/path"
+    },
+    {
+      "id": "secret-027",
+      "classification": "secret",
+      "input": "https://example.test/?api%5Fkey%3Dfixture27abcdefghijkl"
+    },
+    {
+      "id": "secret-028",
+      "classification": "secret",
+      "input": "https://example.test/?%61%70%69%5F%6B%65%79%3Dfixture28abcdefghijkl"
+    },
+    {
+      "id": "secret-029",
+      "classification": "secret",
+      "input": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmaXh0dXJl29In0.c2lnbmF0dXJlVmFsdWU"
+    },
+    {
+      "id": "secret-030",
+      "classification": "secret",
+      "input": "sk-proj-fixturetoken30abcdefghijklmnop"
+    },
+    {
+      "id": "secret-031",
+      "classification": "secret",
+      "input": "sk-ant-fixturetoken31abcdefghijklmnop"
+    },
+    {
+      "id": "secret-032",
+      "classification": "secret",
+      "input": "AIzaSyFixtureTokenValue32abcdefghijklmnop"
+    },
+    {
+      "id": "secret-033",
+      "classification": "secret",
+      "input": "ghp_fixturetoken33abcdefghijklmnop"
+    },
+    {
+      "id": "secret-034",
+      "classification": "secret",
+      "input": "github_pat_fixturetoken34abcdefghijklmnop"
+    },
+    {
+      "id": "secret-035",
+      "classification": "secret",
+      "input": "xoxb-fixturetoken35abcdefghijklmnop"
+    },
+    {
+      "id": "secret-036",
+      "classification": "secret",
+      "input": "C:\\Users\\FixtureUser36\\OpenClaw\\report.txt"
+    },
+    {
+      "id": "secret-037",
+      "classification": "secret",
+      "input": "gatewayToken: fixture-value-37-abcdefghijkl"
+    },
+    {
+      "id": "secret-038",
+      "classification": "secret",
+      "input": "multiLine\nrefresh_token=fixture-value-38-abcdefghijkl\nnext=line"
+    },
+    {
+      "id": "secret-039",
+      "classification": "secret",
+      "input": "apiKey=fixture-value-39-abcdefghijkl"
+    },
+    {
+      "id": "secret-040",
+      "classification": "secret",
+      "input": "access_token: fixture-value-40-abcdefghijkl"
+    },
+    {
+      "id": "secret-041",
+      "classification": "secret",
+      "input": "client-secret = fixture-value-41-abcdefghijkl"
+    },
+    {
+      "id": "secret-042",
+      "classification": "secret",
+      "input": "PASSWORD=fixture-value-42-abcdefghijkl"
+    },
+    {
+      "id": "secret-043",
+      "classification": "secret",
+      "input": "Authorization: Bearer fixtureBearer43abcdefghijkl"
+    },
+    {
+      "id": "secret-044",
+      "classification": "secret",
+      "input": "Basic Zml4dHVyZVVzZXI6Zml4dHVyZVBhc3M44"
+    },
+    {
+      "id": "secret-045",
+      "classification": "secret",
+      "input": "https://user45:password45@example.test/path"
+    },
+    {
+      "id": "secret-046",
+      "classification": "secret",
+      "input": "https://example.test/?api%5Fkey%3Dfixture46abcdefghijkl"
+    },
+    {
+      "id": "secret-047",
+      "classification": "secret",
+      "input": "https://example.test/?%61%70%69%5F%6B%65%79%3Dfixture47abcdefghijkl"
+    },
+    {
+      "id": "secret-048",
+      "classification": "secret",
+      "input": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmaXh0dXJl48In0.c2lnbmF0dXJlVmFsdWU"
+    },
+    {
+      "id": "secret-049",
+      "classification": "secret",
+      "input": "sk-proj-fixturetoken49abcdefghijklmnop"
+    },
+    {
+      "id": "secret-050",
+      "classification": "secret",
+      "input": "sk-ant-fixturetoken50abcdefghijklmnop"
+    },
+    {
+      "id": "secret-051",
+      "classification": "secret",
+      "input": "AIzaSyFixtureTokenValue51abcdefghijklmnop"
+    },
+    {
+      "id": "secret-052",
+      "classification": "secret",
+      "input": "ghp_fixturetoken52abcdefghijklmnop"
+    },
+    {
+      "id": "secret-053",
+      "classification": "secret",
+      "input": "github_pat_fixturetoken53abcdefghijklmnop"
+    },
+    {
+      "id": "secret-054",
+      "classification": "secret",
+      "input": "xoxb-fixturetoken54abcdefghijklmnop"
+    },
+    {
+      "id": "secret-055",
+      "classification": "secret",
+      "input": "C:\\Users\\FixtureUser55\\OpenClaw\\report.txt"
+    },
+    {
+      "id": "secret-056",
+      "classification": "secret",
+      "input": "gatewayToken: fixture-value-56-abcdefghijkl"
+    },
+    {
+      "id": "secret-057",
+      "classification": "secret",
+      "input": "multiLine\nrefresh_token=fixture-value-57-abcdefghijkl\nnext=line"
+    },
+    {
+      "id": "secret-058",
+      "classification": "secret",
+      "input": "apiKey=fixture-value-58-abcdefghijkl"
+    },
+    {
+      "id": "secret-059",
+      "classification": "secret",
+      "input": "access_token: fixture-value-59-abcdefghijkl"
+    },
+    {
+      "id": "secret-060",
+      "classification": "secret",
+      "input": "client-secret = fixture-value-60-abcdefghijkl"
+    },
+    {
+      "id": "secret-061",
+      "classification": "secret",
+      "input": "PASSWORD=fixture-value-61-abcdefghijkl"
+    },
+    {
+      "id": "secret-062",
+      "classification": "secret",
+      "input": "Authorization: Bearer fixtureBearer62abcdefghijkl"
+    },
+    {
+      "id": "secret-063",
+      "classification": "secret",
+      "input": "Basic Zml4dHVyZVVzZXI6Zml4dHVyZVBhc3M63"
+    },
+    {
+      "id": "secret-064",
+      "classification": "secret",
+      "input": "https://user64:password64@example.test/path"
+    },
+    {
+      "id": "secret-065",
+      "classification": "secret",
+      "input": "https://example.test/?api%5Fkey%3Dfixture65abcdefghijkl"
+    },
+    {
+      "id": "nonsecret-001",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.1.12"
+    },
+    {
+      "id": "nonsecret-002",
+      "classification": "nonsecret",
+      "input": "Exit code 1002; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-003",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-004",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-4.txt"
+    },
+    {
+      "id": "nonsecret-005",
+      "classification": "nonsecret",
+      "input": "monkey=normal keyboard=normal hockey=normal layout=normal value=5"
+    },
+    {
+      "id": "nonsecret-006",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=6&mode=local"
+    },
+    {
+      "id": "nonsecret-007",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.7.12"
+    },
+    {
+      "id": "nonsecret-008",
+      "classification": "nonsecret",
+      "input": "Exit code 1008; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-009",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-010",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-10.txt"
+    },
+    {
+      "id": "nonsecret-011",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 11"
+    },
+    {
+      "id": "nonsecret-012",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=12&mode=local"
+    },
+    {
+      "id": "nonsecret-013",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.13.12"
+    },
+    {
+      "id": "nonsecret-014",
+      "classification": "nonsecret",
+      "input": "Exit code 1014; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-015",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-016",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-16.txt"
+    },
+    {
+      "id": "nonsecret-017",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 17"
+    },
+    {
+      "id": "nonsecret-018",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=18&mode=local"
+    },
+    {
+      "id": "nonsecret-019",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.19.12"
+    },
+    {
+      "id": "nonsecret-020",
+      "classification": "nonsecret",
+      "input": "Exit code 1020; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-021",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-022",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-22.txt"
+    },
+    {
+      "id": "nonsecret-023",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 23"
+    },
+    {
+      "id": "nonsecret-024",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=24&mode=local"
+    },
+    {
+      "id": "nonsecret-025",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.25.12"
+    },
+    {
+      "id": "nonsecret-026",
+      "classification": "nonsecret",
+      "input": "Exit code 1026; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-027",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-028",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-28.txt"
+    },
+    {
+      "id": "nonsecret-029",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 29"
+    },
+    {
+      "id": "nonsecret-030",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=30&mode=local"
+    },
+    {
+      "id": "nonsecret-031",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.31.12"
+    },
+    {
+      "id": "nonsecret-032",
+      "classification": "nonsecret",
+      "input": "Exit code 1032; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-033",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-034",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-34.txt"
+    },
+    {
+      "id": "nonsecret-035",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 35"
+    },
+    {
+      "id": "nonsecret-036",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=36&mode=local"
+    },
+    {
+      "id": "nonsecret-037",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.37.12"
+    },
+    {
+      "id": "nonsecret-038",
+      "classification": "nonsecret",
+      "input": "Exit code 1038; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-039",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-040",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-40.txt"
+    },
+    {
+      "id": "nonsecret-041",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 41"
+    },
+    {
+      "id": "nonsecret-042",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=42&mode=local"
+    },
+    {
+      "id": "nonsecret-043",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.43.12"
+    },
+    {
+      "id": "nonsecret-044",
+      "classification": "nonsecret",
+      "input": "Exit code 1044; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-045",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-046",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-46.txt"
+    },
+    {
+      "id": "nonsecret-047",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 47"
+    },
+    {
+      "id": "nonsecret-048",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=48&mode=local"
+    },
+    {
+      "id": "nonsecret-049",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.49.12"
+    },
+    {
+      "id": "nonsecret-050",
+      "classification": "nonsecret",
+      "input": "Exit code 1050; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-051",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-052",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-52.txt"
+    },
+    {
+      "id": "nonsecret-053",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 53"
+    },
+    {
+      "id": "nonsecret-054",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=54&mode=local"
+    },
+    {
+      "id": "nonsecret-055",
+      "classification": "nonsecret",
+      "input": "OpenClaw version 0.55.12"
+    },
+    {
+      "id": "nonsecret-056",
+      "classification": "nonsecret",
+      "input": "Exit code 1056; gateway status unavailable"
+    },
+    {
+      "id": "nonsecret-057",
+      "classification": "nonsecret",
+      "input": "C:\\Program Files\\OpenClaw\\bin\\openclaw.exe"
+    },
+    {
+      "id": "nonsecret-058",
+      "classification": "nonsecret",
+      "input": "D:\\Diagnostics\\reports\\report-58.txt"
+    },
+    {
+      "id": "nonsecret-059",
+      "classification": "nonsecret",
+      "input": "normal monkey keyboard hockey layout value 59"
+    },
+    {
+      "id": "nonsecret-060",
+      "classification": "nonsecret",
+      "input": "https://docs.example.test/install?step=60&mode=local"
+    }
+  ]
+}

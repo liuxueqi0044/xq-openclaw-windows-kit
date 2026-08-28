@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "forbiddenPathFragments": [".env", ".git", "token", "cookie", "credential", "cache", "test", "fixture", "log", "recording", "id_rsa", ".pem", ".pfx", ".key"],
+  "forbiddenExtensions": [".dll", ".msi", ".bat", ".psd1", ".zip", ".7z", ".rar", ".lnk"],
+  "maxFileSizeBytes": 2147483648
+}

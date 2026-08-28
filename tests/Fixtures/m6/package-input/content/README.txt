@@ -1,0 +1,1 @@
+Fixture offline README.

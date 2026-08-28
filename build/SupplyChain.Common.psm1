@@ -92,11 +92,11 @@ function Get-XqReleaseAsset {
     )
 
     $assets = @(Get-XqProperty -Object $Release -Name 'assets' -Required)
-    $matches = @($assets | Where-Object { [string](Get-XqProperty -Object $_ -Name 'name' -Required) -ceq $ExactName })
-    if ($matches.Count -ne 1) {
+    $matchingAssets = @($assets | Where-Object { [string](Get-XqProperty -Object $_ -Name 'name' -Required) -ceq $ExactName })
+    if ($matchingAssets.Count -ne 1) {
         throw "Release must contain exactly one asset named '$ExactName'."
     }
-    $asset = $matches[0]
+    $asset = $matchingAssets[0]
     $size = [Int64](Get-XqProperty -Object $asset -Name 'size' -Required)
     $assetId = [Int64](Get-XqProperty -Object $asset -Name 'id' -Required)
     if ($size -le 0 -or $assetId -le 0) { throw "Release asset '$ExactName' has an invalid id or size." }

@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema", "type":"object", "additionalProperties":false,
+  "required":["schemaVersion","packageRootName","allowedPaths","allowedExecutablePaths"],
+  "properties":{"schemaVersion":{"const":1},"packageRootName":{"const":"XQ-OpenClaw-Windows"},"allowedPaths":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"allowedExecutablePaths":{"type":"array","items":{"type":"string","minLength":1}}}
+}

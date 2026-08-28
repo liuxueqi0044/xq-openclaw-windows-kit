@@ -1,0 +1,76 @@
+name: Build candidate package
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: 'Approved commit or tag to build'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  build-candidate:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout pinned source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.source_ref }}
+          persist-credentials: false
+      - name: Validate approved lock before build
+        shell: pwsh
+        env:
+          SOURCE_REF: ${{ inputs.source_ref }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $lock = Get-Content ./manifest/upstream-lock.json -Raw | ConvertFrom-Json
+          if ($lock.approval.status -cne 'approved') { throw 'Formal build requires an approved upstream lock.' }
+          if ($lock.repository.owner -cne 'openclaw' -or $lock.repository.name -cne 'openclaw') { throw 'Unexpected upstream repository.' }
+          if ($env:SOURCE_REF -notmatch '^[A-Fa-f0-9]{40}$') { throw 'Build must start from an immutable full commit SHA.' }
+          if ((git rev-parse HEAD).Trim() -cne $env:SOURCE_REF.ToLowerInvariant()) { throw 'Resolved checkout SHA differs from requested immutable source ref.' }
+      - name: Fetch and verify locked upstream artifacts
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $verified = Join-Path $env:RUNNER_TEMP 'verified-upstream'
+          & ./build/Fetch-LockedArtifacts.ps1 -LockPath ./manifest/upstream-lock.json -VerifiedOutputDirectory $verified
+          if (-not (Test-Path -LiteralPath (Join-Path $verified 'verification-result.json') -PathType Leaf)) { throw 'M2 verification result is missing.' }
+      - name: Run fixed toolchain and tests
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Save-Module -Name Pester -RequiredVersion 5.7.1 -Path $env:RUNNER_TEMP -Force
+          Save-Module -Name PSScriptAnalyzer -RequiredVersion 1.25.0 -Path $env:RUNNER_TEMP -Force
+          $pester = (Get-ChildItem $env:RUNNER_TEMP -Filter Pester.psd1 -Recurse | Select-Object -First 1).FullName
+          $analyzer = (Get-ChildItem $env:RUNNER_TEMP -Filter PSScriptAnalyzer.psd1 -Recurse | Select-Object -First 1).FullName
+          if (-not $pester -or -not $analyzer) { throw 'Pinned Pester/PSScriptAnalyzer modules were not resolved.' }
+          Import-Module $analyzer -Force
+          if (-not (Test-Path ./build/Invoke-QualityGates.ps1)) { throw 'M7 quality gate entrypoint is required before candidate packaging.' }
+          & ./build/Invoke-QualityGates.ps1 -PesterModulePath $pester -PSScriptAnalyzerModulePath $analyzer -Mode Formal -TestSummaryPath (Join-Path $env:RUNNER_TEMP 'test-summary.json')
+      - name: Build from verified inputs
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $verified = Join-Path $env:RUNNER_TEMP 'verified-upstream'
+          $dist = Join-Path $env:GITHUB_WORKSPACE 'dist'
+          if (-not (Test-Path ./build/Build-Package.ps1)) { throw 'M6 build entrypoint is required before candidate packaging.' }
+          & ./build/Build-Package.ps1 -LockPath ./manifest/upstream-lock.json -VerifiedDirectory $verified -OutputDirectory $dist -TestSummaryPath (Join-Path $env:RUNNER_TEMP 'test-summary.json') -Mode Formal
+          if (-not (Get-ChildItem $dist -Filter '*.zip' -File)) { throw 'Formal build produced no ZIP.' }
+      - name: Upload candidate evidence only (M9 still required)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: package-candidate-${{ github.sha }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+            ${{ runner.temp }}/test-summary.json
+            ${{ runner.temp }}/test-summary.json.report.json
+            ${{ runner.temp }}/test-summary.json.coverage.xml
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "status": "pending",
+  "package": { "fileName": "XQ-OpenClaw-Windows-x64-v0.1.0.zip", "sha256": "", "xqVersion": "0.1.0", "upstreamVersion": "" },
+  "vm": { "os": "Windows 11", "architecture": "x64", "cleanSnapshot": false, "tester": "", "completedAtUtc": "" },
+  "steps": [
+    { "id": 1, "result": "pending", "evidenceRef": "" }, { "id": 2, "result": "pending", "evidenceRef": "" },
+    { "id": 3, "result": "pending", "evidenceRef": "" }, { "id": 4, "result": "pending", "evidenceRef": "" },
+    { "id": 5, "result": "pending", "evidenceRef": "" }, { "id": 6, "result": "pending", "evidenceRef": "" },
+    { "id": 7, "result": "pending", "evidenceRef": "" }, { "id": 8, "result": "pending", "evidenceRef": "" },
+    { "id": 9, "result": "pending", "evidenceRef": "" }, { "id": 10, "result": "pending", "evidenceRef": "" },
+    { "id": 11, "result": "pending", "evidenceRef": "" }, { "id": 12, "result": "pending", "evidenceRef": "" }
+  ],
+  "evidence": { "screenshots": [], "recording": "", "diagnosticReport": "", "defenderScan": "", "uninstallCheck": "", "secretScan": "pending" },
+  "privacy": { "reviewed": false, "notes": "" },
+  "credentials": { "testKeyRevoked": false, "revokedAtUtc": "" },
+  "approval": { "approvedBy": "", "approvedAtUtc": "" }
+}

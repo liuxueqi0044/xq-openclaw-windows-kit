@@ -11,8 +11,12 @@ $scriptDirectory = $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($scriptDirectory)) { $scriptDirectory = Split-Path -Parent $PSCommandPath }
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) { $OutputDirectory = Join-Path -Path $scriptDirectory -ChildPath 'reports' }
 if ([string]::IsNullOrWhiteSpace($PolicyPath)) { $PolicyPath = Join-Path -Path $scriptDirectory -ChildPath '..\policy\diagnostic-command-policy.json' }
+$redactionModulePath = Join-Path -Path $scriptDirectory -ChildPath 'XQ.Redaction.psm1'
+if (-not (Test-Path -LiteralPath $redactionModulePath -PathType Leaf)) { throw '无法加载统一脱敏模块。' }
+Import-Module -Name $redactionModulePath -Force -DisableNameChecking -ErrorAction Stop
 $script:XqDiagnosticVersion = '1'
 $script:XqDiagnosticPolicy = $null
+$script:XqRedactionContext = $null
 
 function Initialize-XqDiagnosticPolicy {
     param([Parameter(Mandatory)][string]$Path)
@@ -65,88 +69,6 @@ function New-XqFinding {
     [pscustomobject]@{ Component=$Component; Code=$Code; Severity=$Severity; Message=$Message }
 }
 
-function Get-XqKeyName {
-    param([AllowNull()][object]$Value)
-    if ($null -eq $Value) { return '' }
-    return ([string]$Value).ToLowerInvariant() -replace '[^a-z0-9]',''
-}
-
-function Redact-XqText {
-    <# Minimal unified boundary helper. It deliberately does not inspect files or environment variables. #>
-    [CmdletBinding()]
-    param([AllowNull()][object]$InputObject)
-    if ($null -eq $InputObject) { return $null }
-    $text = [string]$InputObject
-    $text = $text.Replace(([string][char]0),'')
-    $count = 0
-    $patterns = @(
-        @{ Pattern='(?i)([A-Z]:\\Users\\)[^\\\s]+'; Replacement='$1[USER]' },
-        @{ Pattern='(?im)(authorization\s*[:=]\s*(?:bearer|basic)\s+)[^\s,;]+'; Replacement='$1[REDACTED]' },
-        @{ Pattern='(?im)(\b(?:bearer|basic)\s+)[A-Za-z0-9+/=_\-.]{12,}'; Replacement='$1[REDACTED]' },
-        @{ Pattern='(?im)(["'' ]?[A-Za-z][A-Za-z0-9_-]*(?:key|token|secret|password|authorization|cookie|credential)[A-Za-z0-9_-]*["'' ]*\s*[:=]\s*)(?!["'']?\[REDACTED\]["'']?(?:\s*[,;}\r\n]|\s*$))(?:"[^"]*"|''[^'']*''|[^\s,;}\r\n]+)'; Replacement='$1[REDACTED]' },
-        @{ Pattern='(?i)([?&](?:api[_-]?key|token|secret|password|key|credential)=)[^&#\s]+'; Replacement='$1[REDACTED]' },
-        @{ Pattern='(?i)(https?://[^\s/@:]+:)[^\s/@]+(@)'; Replacement='$1[REDACTED]$2' },
-        @{ Pattern='\beyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\b'; Replacement='[REDACTED]' },
-        @{ Pattern='\b(?:sk|gh[pousr]|xox[baprs])-[A-Za-z0-9_\-]{12,}\b'; Replacement='[REDACTED]' }
-    )
-    foreach ($item in $patterns) {
-        $before = $text
-        $text = [regex]::Replace($text, $item.Pattern, $item.Replacement)
-        if ($text -ne $before) { $count++ }
-    }
-    return $text
-}
-
-function Redact-XqCommandOutput {
-    param([AllowNull()][string]$Text,[string]$Command)
-    if ($null -eq $Text) { return $null }
-    $candidate = [string]$Text
-    if ($Command -match '(?i)--json') {
-        try {
-            $parsed = $candidate | ConvertFrom-Json -ErrorAction Stop
-            return ((ConvertTo-XqRedactedObject $parsed) | ConvertTo-Json -Depth 12 -Compress)
-        } catch { }
-    }
-    return (Redact-XqText $candidate)
-}
-
-function ConvertTo-XqRedactedObject {
-    [CmdletBinding()]
-    param([AllowNull()][object]$InputObject)
-    if ($null -eq $InputObject) { return $null }
-    if ($InputObject -is [string] -or $InputObject -is [char]) { return (Redact-XqText $InputObject) }
-    if ($InputObject -is [System.Collections.IDictionary]) {
-        $result = [ordered]@{}
-        foreach ($key in $InputObject.Keys) {
-            $name = [string]$key
-            $normalized = Get-XqKeyName $name
-            if ($normalized -match 'key|token|secret|password|authorization|cookie|credential') {
-                $result[$name] = '[REDACTED]'
-            } else {
-                $result[$name] = ConvertTo-XqRedactedObject $InputObject[$key]
-            }
-        }
-        return [pscustomobject]$result
-    }
-    if ($InputObject -is [System.Collections.IEnumerable] -and -not ($InputObject -is [string])) {
-        $items = foreach ($item in $InputObject) { ConvertTo-XqRedactedObject $item }
-        return @($items)
-    }
-    if ($InputObject -is [pscustomobject]) {
-        $result = [ordered]@{}
-        foreach ($property in $InputObject.PSObject.Properties) {
-            $normalized = Get-XqKeyName $property.Name
-            if ($normalized -match 'key|token|secret|password|authorization|cookie|credential') {
-                $result[$property.Name] = '[REDACTED]'
-            } else {
-                $result[$property.Name] = ConvertTo-XqRedactedObject $property.Value
-            }
-        }
-        return [pscustomobject]$result
-    }
-    return $InputObject
-}
-
 function Get-XqCommandLine {
     param([string]$FileName,[string[]]$Arguments)
     if ($Arguments.Count -eq 0) { return $FileName }
@@ -182,8 +104,8 @@ function Invoke-XqExternalCommand {
         $stderrTask = $process.StandardError.ReadToEndAsync()
         if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
             $result.TimedOut = $true
-            try { $process.Kill() } catch { }
-            try { $process.WaitForExit(2000) } catch { }
+            try { $process.Kill() } catch { Write-Verbose 'Timed-out child process could not be killed.' }
+            try { [void]$process.WaitForExit(2000) } catch { Write-Verbose 'Timed-out child process did not report an exit state.' }
             $result.Error = '外部命令超过时间限制，已停止等待。'
         }
         # Keep output only in this controlled in-memory object; Invoke-XqSafeCommand immediately
@@ -202,9 +124,10 @@ function Invoke-XqExternalCommand {
 function Invoke-XqSafeCommand {
     param([string]$Component,[string]$DisplayCommand,[string]$FileName,[string[]]$Arguments,[int]$TimeoutSeconds)
     $raw = Invoke-XqExternalCommand -FileName $FileName -Arguments $Arguments -TimeoutSeconds $TimeoutSeconds
+    if ($null -eq $script:XqRedactionContext) { $script:XqRedactionContext = New-XqRedactionContext }
     [pscustomobject]@{
         Component=$Component; Command=$DisplayCommand; ExitCode=$raw.ExitCode; TimedOut=$raw.TimedOut
-        StdOut=(Redact-XqCommandOutput $raw.StdOut $DisplayCommand); StdErr=(Redact-XqCommandOutput $raw.StdErr $DisplayCommand); Error=$raw.Error
+        StdOut=(Redact-XqCommandOutput -Text $raw.StdOut -Command $DisplayCommand -Context $script:XqRedactionContext); StdErr=(Redact-XqCommandOutput -Text $raw.StdErr -Command $DisplayCommand -Context $script:XqRedactionContext); Error=$raw.Error
         Status=if ($raw.TimedOut) { 'Timeout' } elseif ($null -eq $raw.ExitCode) { 'Unavailable' } elseif ($raw.ExitCode -eq 0) { 'Succeeded' } else { 'Failed' }
     }
 }
@@ -226,7 +149,7 @@ function Invoke-XqHostProbe {
     try {
         $drive = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='C:'" -ErrorAction Stop
         if ($drive) { $hostData.FreeSpaceBytes = [int64]$drive.FreeSpace }
-    } catch { }
+    } catch { Write-Verbose 'Free-space probe is unavailable.' }
     return [pscustomobject]@{ Data=[pscustomobject]$hostData; Findings=@($findings.ToArray()) }
 }
 
@@ -235,7 +158,7 @@ function Invoke-XqHubProbe {
     $data = [ordered]@{ Status='NotDetected'; DisplayName=$null; Version=$null; Path=$null; SignatureStatus=$null; SignerSubject=$null }
     $entries = @()
     foreach ($root in @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*')) {
-        try { $entries += @(Get-ItemProperty -Path $root -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match '(?i)OpenClaw' }) } catch { }
+        try { $entries += @(Get-ItemProperty -Path $root -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match '(?i)OpenClaw' }) } catch { Write-Verbose 'One uninstall registry view is unavailable.' }
     }
     $entry = $entries | Select-Object -First 1
     if ($entry) {
@@ -336,7 +259,7 @@ function Invoke-XqNativeCliProbe {
     $data = [ordered]@{ Status='NotDetected'; Path=$null; Version=$null }
     $commands = New-Object System.Collections.Generic.List[object]
     $command = $null
-    try { $command = Get-Command -Name 'openclaw' -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 } catch { }
+    try { $command = Get-Command -Name 'openclaw' -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 } catch { Write-Verbose 'Native OpenClaw CLI discovery is unavailable.' }
     if (-not $command) {
         [void]$findings.Add((New-XqFinding 'NativeCli' 'NativeCliNotDetected' '未在 Windows PATH 中发现原生 openclaw CLI；这不是标准 Hub 路径的必要条件。' 'Info'))
         return [pscustomobject]@{ Data=[pscustomobject]$data; Commands=@($commands.ToArray()); Findings=@($findings.ToArray()) }
@@ -362,7 +285,7 @@ function Invoke-XqOptionalRuntimeProbe {
     foreach ($id in @('node-version','npm-version')) {
         $spec = Get-XqPolicyCommand $id
         $present = $null
-        try { $present = Get-Command -Name ([string]$spec.executable) -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 } catch { }
+        try { $present = Get-Command -Name ([string]$spec.executable) -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 } catch { Write-Verbose 'Optional runtime discovery is unavailable.' }
         if ($present) {
             $runtimePath = [string]$present.Source
             if ([string]::IsNullOrWhiteSpace($runtimePath)) { $runtimePath = [string]$present.Path }
@@ -376,14 +299,31 @@ function Invoke-XqOptionalRuntimeProbe {
     return [pscustomobject]@{ Commands=@($commands.ToArray()); Findings=@($findings.ToArray()) }
 }
 
+function Write-XqPrivacyBlockedNotice {
+    param([Parameter(Mandatory)][string]$OutputDirectory)
+    $notice = '诊断报告未写出：隐私检查发现可能的敏感内容。请勿发送 API Key、密码、Cookie、Token 或完整配置；请在删除敏感内容后重新运行诊断。'
+    try { [void](New-Item -ItemType Directory -Path $OutputDirectory -Force -ErrorAction Stop) } catch { throw '无法创建安全错误提示目录。' }
+    for ($attempt=0; $attempt -lt 5; $attempt++) {
+        $name = 'OpenClaw-Diagnostic-Privacy-Blocked-{0}-{1}.txt' -f (Get-Date -Format 'yyyyMMdd-HHmmss'),([Guid]::NewGuid().ToString('N').Substring(0,6))
+        $path = Join-Path $OutputDirectory $name
+        try {
+            $stream = New-Object System.IO.FileStream($path,[System.IO.FileMode]::CreateNew,[System.IO.FileAccess]::Write,[System.IO.FileShare]::None)
+            try { $writer = New-Object System.IO.StreamWriter($stream,(New-Object System.Text.UTF8Encoding($false))); $writer.Write($notice); $writer.Flush() } finally { if ($writer) { $writer.Dispose() } else { $stream.Dispose() } }
+            return $path
+        } catch [System.IO.IOException] { continue }
+    }
+    throw '无法以不覆盖旧文件的方式创建安全错误提示。'
+}
+
 function Write-XqDiagnosticReport {
     [CmdletBinding()]
     param([Parameter(Mandatory)][object]$Report,[Parameter(Mandatory)][string]$OutputDirectory)
-    $safe = ConvertTo-XqRedactedObject $Report
+    if ($null -eq $script:XqRedactionContext) { $script:XqRedactionContext = New-XqRedactionContext }
+    $safe = ConvertTo-XqRedactedObject -InputObject $Report -Context $script:XqRedactionContext
     $json = $safe | ConvertTo-Json -Depth 12
-    $scan = Redact-XqText $json
-    if ($scan -cne $json) { throw '报告在最终检查中仍包含需要脱敏的内容，已阻止写出。' }
-    if ($scan -match '(?im)authorization\s*[:=]\s*(?!["'' ]*\[REDACTED\])["'' ]*(?:bearer|basic)\s+(?!\[REDACTED\])\S+' -or $scan -match '(?i)\beyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\b' -or $scan -match '(?i)\b(?:sk|gh[pousr]|xox[baprs])-[A-Za-z0-9_\-]{12,}\b') { throw '报告秘密扫描未通过，已阻止写出。' }
+    $json = Redact-XqText -InputObject $json -Context $script:XqRedactionContext
+    try { Assert-XqTextIsSafe -Text $json } catch { [void](Write-XqPrivacyBlockedNotice -OutputDirectory $OutputDirectory); throw 'Sensitive-content scan failed; only a safe privacy notice was written.' }
+    $safe.RedactionSummary = Get-XqRedactionSummary -Context $script:XqRedactionContext
     $lines = New-Object System.Collections.Generic.List[string]
     [void]$lines.Add('XQ 只读诊断报告')
     [void]$lines.Add('================')
@@ -404,12 +344,13 @@ function Write-XqDiagnosticReport {
         if ($command.Error) { [void]$lines.Add(('  说明：' + $command.Error)) }
     }
     [void]$lines.Add(''); [void]$lines.Add('[脱敏与限制]')
-    [void]$lines.Add(' 已对结构化敏感字段和命令输出执行统一替换：' + $safe.RedactionSummary.ReplacementToken)
+    $summaryText = @($safe.RedactionSummary.Categories | ForEach-Object { $_.Category + ' (' + $_.Count + ')' }) -join '，'
+    if ([string]::IsNullOrWhiteSpace($summaryText)) { $summaryText = '无' }
+    [void]$lines.Add(' 替换类别与数量：' + $summaryText)
     foreach ($limitation in @($safe.Limitations)) { [void]$lines.Add((' ' + $limitation)) }
     $text = $lines -join [Environment]::NewLine
-    $finalScan = Redact-XqText $text
-    if ($finalScan -cne $text) { throw '报告文本在最终检查中仍包含需要脱敏的内容，已阻止写出。' }
-    if ($finalScan -match '(?im)authorization\s*[:=]\s*(?!["'' ]*\[REDACTED\])["'' ]*(?:bearer|basic)\s+(?!\[REDACTED\])\S+' -or $finalScan -match '(?i)\beyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\b' -or $finalScan -match '(?i)\b(?:sk|gh[pousr]|xox[baprs])-[A-Za-z0-9_\-]{12,}\b') { throw '报告秘密扫描未通过，已阻止写出。' }
+    $text = Redact-XqText -InputObject $text -Context $script:XqRedactionContext
+    try { Assert-XqTextIsSafe -Text $text } catch { [void](Write-XqPrivacyBlockedNotice -OutputDirectory $OutputDirectory); throw 'Sensitive-content scan failed; only a safe privacy notice was written.' }
     try { [void](New-Item -ItemType Directory -Path $OutputDirectory -Force -ErrorAction Stop) } catch { throw '无法创建诊断报告目录。' }
     for ($attempt=0; $attempt -lt 5; $attempt++) {
         $name = 'OpenClaw-Diagnostic-{0}-{1}.txt' -f (Get-Date -Format 'yyyyMMdd-HHmmss'),([Guid]::NewGuid().ToString('N').Substring(0,6))
@@ -427,6 +368,7 @@ function Invoke-XqDiagnosticMain {
     param([string]$OutputDirectory,[int]$TimeoutSeconds=20,[string]$PolicyPath)
     try { $policy = Initialize-XqDiagnosticPolicy -Path $PolicyPath } catch { Write-Error $_.Exception.Message; return 1 }
     if ($TimeoutSeconds -eq 20 -and $policy.defaultCommandTimeoutSeconds) { $TimeoutSeconds = [int]$policy.defaultCommandTimeoutSeconds }
+    $script:XqRedactionContext = New-XqRedactionContext
     $started = Get-Date
     $findings = New-Object System.Collections.Generic.List[object]
     $commands = New-Object System.Collections.Generic.List[object]
@@ -439,7 +381,7 @@ function Invoke-XqDiagnosticMain {
         Metadata=[pscustomobject]@{ ReportVersion=$script:XqDiagnosticVersion; Product='XQ Windows 配置与排错资料包'; ProductVersion='0.1.0'; GeneratedAtUtc=$started.ToUniversalTime().ToString('o'); ReadOnly=$true }
         WindowsHost=$hostProbe.Data; HubInstallation=$hub.Data; WslGateway=$managed.Data; NativeCli=$native.Data
         HealthFindings=@($findings.ToArray()); CommandResults=@($commands.ToArray())
-        RedactionSummary=[pscustomobject]@{ Applied=$true; ReplacementToken='[REDACTED]'; SourceMinimization='环境变量、配置、会话、浏览器数据和原始日志未采集' }
+        RedactionSummary=$null
         Limitations=@('报告只反映当前有限探测。','XQ 不代表 OpenClaw 官方，也不保证模型提供商、网络或未来版本行为。')
     }
     try { $path = Write-XqDiagnosticReport -Report $report -OutputDirectory $OutputDirectory; Write-Output ('诊断报告已生成：' + $path); return 0 }

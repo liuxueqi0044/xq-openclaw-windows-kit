@@ -128,4 +128,4 @@ if (-not $result.Passed) {
     $result.Errors | ForEach-Object { Write-Error $_ }
     exit 1
 }
-Write-Host 'M0 product-policy validation passed.'
+Write-Output 'M0 product-policy validation passed.'
