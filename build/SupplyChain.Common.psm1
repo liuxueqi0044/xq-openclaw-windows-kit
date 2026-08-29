@@ -2,11 +2,10 @@ Set-StrictMode -Version Latest
 
 $script:TrustedRepository = [ordered]@{
     Owner = 'openclaw'
-    Name = 'openclaw'
-    RepositoryId = [Int64]1103012935
+    Name = 'openclaw-windows-node'
+    RepositoryId = [Int64]1144728715
 }
 $script:InstallerAssetName = 'OpenClawCompanion-Setup-x64.exe'
-$script:ChecksumAssetName = 'OpenClawCompanion-SHA256SUMS.txt'
 $script:AllowedDownloadHosts = @(
     'api.github.com', 'github.com', 'objects.githubusercontent.com',
     'github-releases.githubusercontent.com', 'release-assets.githubusercontent.com',
@@ -99,8 +98,16 @@ function Get-XqReleaseAsset {
     $asset = $matchingAssets[0]
     $size = [Int64](Get-XqProperty -Object $asset -Name 'size' -Required)
     $assetId = [Int64](Get-XqProperty -Object $asset -Name 'id' -Required)
-    if ($size -le 0 -or $assetId -le 0) { throw "Release asset '$ExactName' has an invalid id or size." }
+    $state = [string](Get-XqProperty -Object $asset -Name 'state' -Required)
+    if ($size -le 0 -or $assetId -le 0 -or $state -cne 'uploaded') { throw "Release asset '$ExactName' must have a valid id, non-zero size, and uploaded state." }
     return $asset
+}
+function Get-XqAssetDigestSha256 {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)]$Asset)
+    $digest = [string](Get-XqProperty -Object $Asset -Name 'digest' -Required)
+    if ($digest -notmatch '^sha256:([a-f0-9]{64})$') { throw 'Release asset digest must be sha256: followed by 64 lowercase hexadecimal characters.' }
+    return $Matches[1].ToUpperInvariant()
 }
 
 function Get-XqSha256 {
@@ -121,21 +128,25 @@ function Assert-XqSha256 {
     if ($Actual -cne $Expected.ToUpperInvariant()) { throw "$Label SHA-256 mismatch." }
 }
 
-function Get-XqChecksumEntry {
+function ConvertTo-XqUtcTimestamp {
     [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)][string]$ChecksumPath,
-        [Parameter(Mandatory)][string]$AssetName
-    )
-
-    $checksumMatches = @()
-    foreach ($line in (Get-Content -LiteralPath $ChecksumPath -ErrorAction Stop)) {
-        if ($line -match '^\s*([A-Fa-f0-9]{64})\s+\*?(.+?)\s*$') {
-            if ($Matches[2] -ceq $AssetName) { $checksumMatches += $Matches[1].ToUpperInvariant() }
+    param([Parameter(Mandatory)]$Value)
+    try {
+        if ($Value -is [DateTime]) {
+            $dateTime = [DateTime]$Value
+            if ($dateTime.Kind -eq [DateTimeKind]::Unspecified) { throw 'Timestamp has no time-zone information.' }
+            $dateTimeOffset = [DateTimeOffset]$dateTime
         }
+        else {
+            $dateTimeOffset = [DateTimeOffset]::Parse(
+                [string]$Value,
+                [Globalization.CultureInfo]::InvariantCulture,
+                [Globalization.DateTimeStyles]::RoundtripKind
+            )
+        }
+        return $dateTimeOffset.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'", [Globalization.CultureInfo]::InvariantCulture)
     }
-    if ($checksumMatches.Count -ne 1) { throw "Checksum file must contain exactly one checksum for '$AssetName'." }
-    return $checksumMatches[0]
+    catch { throw 'UTC timestamp is invalid or lacks time-zone information.' }
 }
 
 function Assert-XqDownloadUri {
@@ -250,12 +261,10 @@ function Assert-XqApprovedLock {
     $installer = Get-XqProperty -Object $Lock -Name 'installer' -Required
     if ([Int64](Get-XqProperty -Object $installer -Name 'assetId' -Required) -le 0 -or [string](Get-XqProperty -Object $installer -Name 'name' -Required) -cne $script:InstallerAssetName -or [Int64](Get-XqProperty -Object $installer -Name 'size' -Required) -le 0) { throw 'Approved lock installer identity is invalid.' }
     if ([string]::IsNullOrWhiteSpace([string](Get-XqProperty -Object $installer -Name 'signerSubject' -Required)) -or ([string](Get-XqProperty -Object $installer -Name 'signerThumbprint' -Required)).Replace(' ', '') -notmatch '^[A-Fa-f0-9]{40}$' -or -not [bool](Get-XqProperty -Object $installer -Name 'timestampRequired' -Required)) { throw 'Approved lock signer policy is invalid.' }
-    $checksumAsset = Get-XqProperty -Object $Lock -Name 'checksumAsset' -Required
-    if ([Int64](Get-XqProperty -Object $checksumAsset -Name 'assetId' -Required) -le 0 -or [string](Get-XqProperty -Object $checksumAsset -Name 'name' -Required) -cne $script:ChecksumAssetName) { throw 'Approved lock checksum asset identity is invalid.' }
     $sources = Get-XqProperty -Object $Lock -Name 'sourceFiles' -Required
-    if ([string](Get-XqProperty -Object $sources -Name 'commitSha' -Required) -notmatch '^[A-Fa-f0-9]{40}$') { throw 'Approved lock source commit is invalid.' }
+    if ([string](Get-XqProperty -Object $sources -Name 'commitSha' -Required) -notmatch '^[A-Fa-f0-9]{40}$' -or [string](Get-XqProperty -Object $sources -Name 'licensePath' -Required) -cne 'LICENSE' -or [string](Get-XqProperty -Object $sources -Name 'thirdPartyNoticesPath' -Required) -cne 'src/OpenClaw.Tray.WinUI/THIRD_PARTY_NOTICES.md') { throw 'Approved lock source file identity is invalid.' }
     foreach ($hashPath in @(
-        @($installer, 'sha256'), @($checksumAsset, 'sha256'),
+        @($installer, 'sha256'), @($installer, 'officialDigestSha256'),
         @($sources, 'licenseSha256'), @($sources, 'thirdPartyNoticesSha256')
     )) {
         $hash = [string](Get-XqProperty -Object $hashPath[0] -Name $hashPath[1] -Required)
@@ -271,7 +280,7 @@ function Get-XqSourceContent {
         [string]$ApiBaseUri = 'https://api.github.com',
         [scriptblock]$RequestInvoker
     )
-    if ($Path -notin @('LICENSE', 'THIRD_PARTY_NOTICES.md')) { throw 'Only the approved license source files may be fetched.' }
+    if ($Path -notin @('LICENSE', 'src/OpenClaw.Tray.WinUI/THIRD_PARTY_NOTICES.md')) { throw 'Only the approved license source files may be fetched.' }
     if ($CommitSha -notmatch '^[A-Fa-f0-9]{40}$') { throw 'Source commit must be a full 40-character SHA.' }
     $uri = "$($ApiBaseUri.TrimEnd('/'))/repos/$($script:TrustedRepository.Owner)/$($script:TrustedRepository.Name)/contents/$Path`?ref=$CommitSha"
     $response = Invoke-XqGitHubJson -Uri $uri -RequestInvoker $RequestInvoker
@@ -284,7 +293,7 @@ function Get-XqSourceContent {
 
 Export-ModuleMember -Function @(
     'Get-XqTrustedRepository', 'Get-XqProperty', 'Assert-XqTrustedRepository', 'Invoke-XqGitHubJson',
-    'Get-XqReleaseAsset', 'Get-XqSha256', 'Assert-XqSha256', 'Get-XqChecksumEntry',
+    'Get-XqReleaseAsset', 'Get-XqAssetDigestSha256', 'Get-XqSha256', 'Assert-XqSha256', 'ConvertTo-XqUtcTimestamp',
     'Invoke-XqOfficialAssetDownload', 'Get-XqSignatureSummary', 'Assert-XqSignature', 'Assert-XqCandidateSignature',
     'Assert-XqApprovedLock', 'Get-XqSourceContent'
 )

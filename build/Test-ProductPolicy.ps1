@@ -92,7 +92,7 @@ if ($runningListCommand.Count -ne 1 -or $runningListCommand[0].executable -ne 'w
 }
 
 $signer = Read-JsonObject -Path (Join-Path $policyDirectory 'signer-policy.json')
-if ($signer.approvedRepository.owner -ne 'openclaw' -or $signer.approvedRepository.name -ne 'openclaw' -or $signer.approvedRepository.repositoryId -ne 1103012935) {
+if ($signer.approvedRepository.owner -ne 'openclaw' -or $signer.approvedRepository.name -ne 'openclaw-windows-node' -or $signer.approvedRepository.repositoryId -ne 1144728715) {
     Add-PolicyError 'Signer policy must pin the approved OpenClaw repository identity.'
 }
 if ($signer.releaseInput.approvedLockRequired -ne $true -or $signer.releaseInput.allowLatestAlias -ne $false -or $signer.unknownStateAction -ne 'block-release') {

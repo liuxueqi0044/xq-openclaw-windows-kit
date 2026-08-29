@@ -3,8 +3,8 @@
   "defaultFailureAction": "block-release",
   "gates": [
     { "id": "G1", "name": "scope", "required": ["Windows 11 x64", "windows-hub-local-managed-wsl"], "onFailure": "return-m0" },
-    { "id": "G2", "name": "upstream-lock", "required": ["approved lock", "release", "asset", "checksum"], "onFailure": "reject-build" },
-    { "id": "G3", "name": "authenticity", "required": ["hash", "official checksum", "signer subject", "certificate chain", "timestamp"], "onFailure": "reject-build" },
+    { "id": "G2", "name": "upstream-lock", "required": ["approved lock", "release", "asset", "GitHub asset.digest"], "onFailure": "reject-build" },
+    { "id": "G3", "name": "authenticity", "required": ["hash", "GitHub asset.digest", "signer subject", "certificate chain", "timestamp"], "onFailure": "reject-build" },
     { "id": "G4", "name": "legal-content", "required": ["licenses", "non-official statement", "brand review"], "onFailure": "reject-listing" },
     { "id": "G5", "name": "privacy", "required": ["diagnostic secret scan", "log secret scan", "test secret scan", "evidence secret scan"], "onFailure": "reject-release" },
     { "id": "G6", "name": "package-structure", "required": ["allowlist", "offline content", "determinism", "extract verification"], "onFailure": "reject-release" },

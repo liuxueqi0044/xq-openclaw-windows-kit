@@ -9,16 +9,22 @@ BeforeAll {
 
 Describe 'M1 upstream candidate safeguards' {
     It 'rejects a repository with the right name but a different repository ID' {
-        { Assert-XqTrustedRepository -Repository ([pscustomobject]@{ owner = 'openclaw'; name = 'openclaw'; id = 1 }) } | Should -Throw
+        { Assert-XqTrustedRepository -Repository ([pscustomobject]@{ owner = 'openclaw'; name = 'openclaw-windows-node'; id = 1 }) } | Should -Throw
     }
 
-    It 'requires exactly one installer and checksum asset' {
+    It 'requires exactly one x64 installer asset with a REST digest' {
         $release = [pscustomobject]@{ assets = @(
-            [pscustomobject]@{ id = 1; name = 'OpenClawCompanion-Setup-x64.exe'; size = 1 },
-            [pscustomobject]@{ id = 2; name = 'OpenClawCompanion-Setup-x64.exe'; size = 1 }
+            [pscustomobject]@{ id = 1; name = 'OpenClawCompanion-Setup-x64.exe'; size = 1; state = 'uploaded'; digest = 'sha256:' + ('a' * 64) },
+            [pscustomobject]@{ id = 2; name = 'OpenClawCompanion-Setup-x64.exe'; size = 1; state = 'uploaded'; digest = 'sha256:' + ('b' * 64) }
         ) }
         { Get-XqReleaseAsset -Release $release -ExactName 'OpenClawCompanion-Setup-x64.exe' } | Should -Throw
-        { Get-XqReleaseAsset -Release $release -ExactName 'OpenClawCompanion-SHA256SUMS.txt' } | Should -Throw
+        Get-XqAssetDigestSha256 -Asset ([pscustomobject]@{ id = 1; name = 'OpenClawCompanion-Setup-x64.exe'; size = 1; state = 'uploaded'; digest = 'sha256:' + ('a' * 64) }) | Should -Be ('A' * 64)
+        { Get-XqAssetDigestSha256 -Asset ([pscustomobject]@{ id = 1; name = 'OpenClawCompanion-Setup-x64.exe'; size = 1; state = 'uploaded'; digest = 'sha512:' + ('a' * 64) }) } | Should -Throw
+    }
+
+    It 'rejects an asset that is not fully uploaded' {
+        $release = [pscustomobject]@{ assets = @([pscustomobject]@{ id = 1; name = 'OpenClawCompanion-Setup-x64.exe'; size = 1; state = 'open'; digest = 'sha256:' + ('a' * 64) }) }
+        { Get-XqReleaseAsset -Release $release -ExactName 'OpenClawCompanion-Setup-x64.exe' } | Should -Throw
     }
 
     It 'never permits candidate output to overwrite the approved lock name, regardless of case' {
@@ -38,7 +44,7 @@ Describe 'M1 upstream candidate safeguards' {
     It 'rejects a malicious API base before any real HTTP request can receive a token' {
         InModuleScope SupplyChain.Common {
             Mock -CommandName Invoke-RestMethod -MockWith { throw 'HTTP should not have been reached.' }
-            { Invoke-XqGitHubJson -Uri 'https://api.github.com.evil.invalid/repos/openclaw/openclaw' } | Should -Throw
+            { Invoke-XqGitHubJson -Uri 'https://api.github.com.evil.invalid/repos/openclaw/openclaw-windows-node' } | Should -Throw
             Should -Invoke -CommandName Invoke-RestMethod -Times 0 -Exactly
         }
         $path = Join-Path ([IO.Path]::GetTempPath()) ("candidate-bad-api-" + [guid]::NewGuid().ToString('N') + '.json')

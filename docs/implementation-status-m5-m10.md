@@ -10,7 +10,7 @@ M5–M10 的源码、策略、工作流和模板已完成当前阶段验收；�
 |---|---|---|---|
 | M5 | 通过 | 统一脱敏模块；125 条语料；嵌套对象、URL 编码、JWT、provider token、Windows 用户路径、幂等和失败关闭 | 对真实 M9 证据再次扫描 |
 | M6 | 通过（Test 模式） | 空 staging、精确白名单、reparse/ADS/扩展名限制、固定时间戳与顺序、两次 ZIP 字节相同、解压复验 | 用 approved lock 和真实 M2 verified 输入执行 Formal |
-| M7 | 通过 | Pester 5.7.1、PSScriptAnalyzer 1.25.0、报告/覆盖率哈希与 commit 绑定、60/60 测试、关键模块覆盖率 ≥85%、0 finding | 在干净 CI runner 复跑 Formal |
+| M7 | 通过 | Pester 5.7.1、PSScriptAnalyzer 1.25.0、报告/覆盖率哈希与 commit 绑定、62/62 测试、关键模块覆盖率 ≥85%、0 finding | 在干净 CI runner 复跑 Formal |
 | M8 | 配置通过 | 手工候选与正式候选工作流分离；只读权限；action 固定完整 SHA；上传 ZIP/hash/双份测试证据 | 在 GitHub Actions 对批准 commit 实际运行 |
 | M9 | 门禁实现通过 | accepted schema、十二步、日期、五张唯一截图、录屏、非空证据、路径逃逸/reparse/ADS、秘密扫描、Key 撤销和人工批准 | 全新 Windows 11 x64 VM 的真实安装、对话、诊断、重启、卸载与 Defender 证据 |
 | M10 | 门禁实现通过 | ready 商品清单、approved lock/产品配置/M9/ZIP 一致性、完整账本哈希链、篡改/重排/暂停/撤回/跨版本隔离 | 实际上架文件重新下载并通过精确 SHA-256 门 |
@@ -27,7 +27,7 @@ M5–M10 的源码、策略、工作流和模板已完成当前阶段验收；�
 
 ## 验证记录
 
-- Pester 5.7.1：60/60 通过，0 skipped；M5 脱敏与 M10 账本纯逻辑合计命令覆盖率 89.45%（门槛 85%）；
+- Pester 5.7.1：62/62 通过，0 skipped；M5 脱敏与 M10 账本纯逻辑合计命令覆盖率 89.45%（门槛 85%）；
 - PSScriptAnalyzer 1.25.0：`build/` 与 `tools/` 共 0 finding；
 - PowerShell 7 AST：28 个 `.ps1/.psm1` 文件通过；JSON：31 个文件可解析；
 - M0 产品策略语义门通过；
@@ -37,7 +37,7 @@ M5–M10 的源码、策略、工作流和模板已完成当前阶段验收；�
 ## 未满足的正式发布条件
 
 1. 审批并提交真实 `manifest/upstream-lock.json`；
-2. 对真实官方安装器、checksum、签名、时间戳、许可证和 notices 完成正向 M2 验证；
+2. 对真实官方安装器、GitHub asset.digest、签名、时间戳、许可证和 notices 完成正向 M2 验证；
 3. 在 GitHub Actions 由完整 commit SHA 生成正式候选；
 4. 对候选的同一 SHA-256 在全新 Windows 11 x64 VM 完成 M9；
 5. 在闲鱼自动交付位重新下载正式 ZIP，并让 M10 门禁验证其哈希和活动账本状态。

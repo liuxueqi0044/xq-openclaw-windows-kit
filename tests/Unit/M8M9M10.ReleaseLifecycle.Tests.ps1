@@ -17,9 +17,9 @@
       $recordPath=Join-Path $root 'acceptance-record.json'; [IO.File]::WriteAllText($recordPath,($record|ConvertTo-Json -Depth 20),(New-Object Text.UTF8Encoding($false)))
       [pscustomobject]@{Root=$root;Evidence=$evidence;Zip=$zip;Record=$recordPath;Hash=$zipHash}
     }
-    function Get-TestLedgerEventHash($event) {
-      $created=if($event.createdAtUtc -is [datetime]){([datetime]$event.createdAtUtc).ToUniversalTime().ToString('o')}else{[string]$event.createdAtUtc}
-      $canonical=[ordered]@{eventId=[string]$event.eventId;eventType=[string]$event.eventType;xqVersion=[string]$event.xqVersion;fileName=[string]$event.fileName;zipSha256=[string]$event.zipSha256;m9RecordSha256=[string]$event.m9RecordSha256;createdAtUtc=$created;actor=[string]$event.actor;previousEventHash=[string]$event.previousEventHash;reason=[string]$event.reason}
+    function Get-TestLedgerEventHash($ledgerEvent) {
+      $created=if($ledgerEvent.createdAtUtc -is [datetime]){([datetime]$ledgerEvent.createdAtUtc).ToUniversalTime().ToString('o')}else{[string]$ledgerEvent.createdAtUtc}
+      $canonical=[ordered]@{eventId=[string]$ledgerEvent.eventId;eventType=[string]$ledgerEvent.eventType;xqVersion=[string]$ledgerEvent.xqVersion;fileName=[string]$ledgerEvent.fileName;zipSha256=[string]$ledgerEvent.zipSha256;m9RecordSha256=[string]$ledgerEvent.m9RecordSha256;createdAtUtc=$created;actor=[string]$ledgerEvent.actor;previousEventHash=[string]$ledgerEvent.previousEventHash;reason=[string]$ledgerEvent.reason}
       $sha=[Security.Cryptography.SHA256]::Create();try{([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($canonical|ConvertTo-Json -Compress -Depth 5)))).Replace('-','')).ToLowerInvariant()}finally{$sha.Dispose()}
     }
   }
@@ -121,14 +121,8 @@
       & (Join-Path $repo 'tools\Update-ReleaseLedger.ps1') -LedgerPath $ledger -EventType publish -XqVersion '9.9.9' -FileName 'XQ-v9.9.9.zip' -ZipSha256 ('9'*64) -M9RecordSha256 ('9'*64) -Actor tester | Out-Null
       $listingObject=[ordered]@{schemaVersion=1;status='ready';xqVersion='0.1.0';upstreamTag='v2026.08.1';supportedOs=@('Windows 11 x64');primaryMode='windows-hub-local-managed-wsl';claims=@('独立中文引导与只读诊断资料');zipFileName='XQ-v0.1.0.zip';zipSha256=$fixture.Hash}; [IO.File]::WriteAllText($listing,($listingObject|ConvertTo-Json -Depth 10),(New-Object Text.UTF8Encoding($false)))
       Copy-Item (Join-Path $repo 'manifest\product-config.json') $config
-      $lockObject=[ordered]@{
-        schemaVersion=1;repository=[ordered]@{owner='openclaw';name='openclaw';repositoryId=1103012935}
-        release=[ordered]@{tag='v2026.08.1';releaseId=1;draft=$false;prerelease=$false;publishedAtUtc='2026-08-28T00:00:00Z'}
-        installer=[ordered]@{assetId=2;name='OpenClawCompanion-Setup-x64.exe';size=4;sha256=('1'*64);signerSubject='CN=Test Fixture';signerThumbprint=('2'*40);timestampRequired=$true}
-        checksumAsset=[ordered]@{assetId=3;name='OpenClawCompanion-SHA256SUMS.txt';sha256=('3'*64)}
-        sourceFiles=[ordered]@{commitSha=('4'*40);licenseSha256=('5'*64);thirdPartyNoticesSha256=('6'*64)}
-        approval=[ordered]@{status='approved';approvedAtUtc='2026-08-28T00:10:00Z';approvedBy='test fixture'}
-      }; [IO.File]::WriteAllText($lock,($lockObject|ConvertTo-Json -Depth 10),(New-Object Text.UTF8Encoding($false)))
+      Copy-Item (Join-Path $repo 'tests\Fixtures\m1m2\approved-upstream-lock.json') $lock
+      $lockObject=Get-Content $lock -Raw|ConvertFrom-Json; $lockObject.release.tag='v2026.08.1'; [IO.File]::WriteAllText($lock,($lockObject|ConvertTo-Json -Depth 10),(New-Object Text.UTF8Encoding($false)))
       { & (Join-Path $repo 'tools\Test-M10Delivery.ps1') -AcceptanceRecordPath $fixture.Record -DeliveryZipPath $fixture.Zip -LedgerPath $ledger -ListingManifestPath $listing -ProductConfigPath $config -LockPath $lock -EvidenceRoot $fixture.Evidence } | Should -Not -Throw
       $badLedger=Join-Path $fixture.Root 'bad-ledger.json'; Copy-Item (Join-Path $repo 'evidence\templates\release-ledger.json') $badLedger; & (Join-Path $repo 'tools\Update-ReleaseLedger.ps1') -LedgerPath $badLedger -EventType publish -XqVersion '0.1.0' -FileName 'XQ-v0.1.0.zip' -ZipSha256 $fixture.Hash -M9RecordSha256 ('0'*64) -Actor tester | Out-Null
       { & (Join-Path $repo 'tools\Test-M10Delivery.ps1') -AcceptanceRecordPath $fixture.Record -DeliveryZipPath $fixture.Zip -LedgerPath $badLedger -ListingManifestPath $listing -ProductConfigPath $config -LockPath $lock -EvidenceRoot $fixture.Evidence } | Should -Throw

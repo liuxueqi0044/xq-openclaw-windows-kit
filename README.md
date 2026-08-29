@@ -8,7 +8,7 @@
 
 ## 状态
 
-M0–M10 的代码、策略、工作流和证据模板已通过架构复核、60 项 Pester 5.7.1 测试、PSScriptAnalyzer 1.25.0、PowerShell AST/JSON 解析检查、确定性测试打包，以及 Windows PowerShell 5.1 真实只读诊断冒烟测试。
+M0–M10 的代码、策略、工作流和证据模板已通过架构复核、62 项 Pester 5.7.1 测试、PSScriptAnalyzer 1.25.0、PowerShell AST/JSON 解析检查、确定性测试打包，以及 Windows PowerShell 5.1 真实只读诊断冒烟测试。
 
 这表示“实现已验收”，不表示“商品已验收”。本仓库仍**不是可上架版本**：尚无人工批准的真实 `upstream-lock.json`、正式 CI 候选、官方安装器实物正向验证、最终正式 ZIP、Windows 11 全流程 VM 证据及闲鱼交付位哈希核验。模板保持 `pending`，测试包带 `TEST-NON-RELEASE` 标记。
 
@@ -16,7 +16,7 @@ M0–M10 的代码、策略、工作流和证据模板已通过架构复核、60
 
 - M0：产品策略、兼容性与安全基线；
 - M1：官方上游候选解析与人工审批前 lock；
-- M2：固定资产、checksum、Authenticode 与许可证验证；
+- M2：固定资产、GitHub `asset.digest`、Authenticode 与许可证验证；
 - M3：完全离线的中文五步引导与售后边界；
 - M4：Hub / Managed WSL / Native CLI 分层只读诊断；
 - M5：统一结构化脱敏、文本兜底扫描与失败关闭隐私门；

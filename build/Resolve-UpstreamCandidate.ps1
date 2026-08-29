@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$CandidateOutputPath,
-    [Int64]$ExpectedRepositoryId = 1103012935,
+    [Int64]$ExpectedRepositoryId = 1144728715,
     [string]$ApiBaseUri = 'https://api.github.com',
     [scriptblock]$RequestInvoker,
     [scriptblock]$DownloadInvoker,
@@ -43,8 +43,9 @@ try {
     $releaseId = [Int64](Get-XqProperty -Object $release -Name 'id' -Required)
     $tag = [string](Get-XqProperty -Object $release -Name 'tag_name' -Required)
     if ($releaseId -le 0 -or [string]::IsNullOrWhiteSpace($tag)) { throw 'Stable release id or tag is invalid.' }
+    $publishedAtUtc = ConvertTo-XqUtcTimestamp -Value (Get-XqProperty -Object $release -Name 'published_at' -Required)
     $installerAsset = Get-XqReleaseAsset -Release $release -ExactName 'OpenClawCompanion-Setup-x64.exe'
-    $checksumAsset = Get-XqReleaseAsset -Release $release -ExactName 'OpenClawCompanion-SHA256SUMS.txt'
+    $officialDigest = Get-XqAssetDigestSha256 -Asset $installerAsset
 
     $commitResponse = Invoke-XqGitHubJson -Uri "$api/repos/$($trusted.Owner)/$($trusted.Name)/commits/$([uri]::EscapeDataString($tag))" -RequestInvoker $RequestInvoker
     $commitSha = [string](Get-XqProperty -Object $commitResponse -Name 'sha' -Required)
@@ -54,18 +55,14 @@ try {
     New-Item -ItemType Directory -Path $work | Out-Null
     try {
         $installerPart = Join-Path $work 'installer.part'
-        $checksumPart = Join-Path $work 'checksums.part'
         Invoke-XqOfficialAssetDownload -AssetId ([Int64](Get-XqProperty -Object $installerAsset -Name 'id' -Required)) -DestinationPath $installerPart -ApiBaseUri $api -DownloadInvoker $DownloadInvoker
-        Invoke-XqOfficialAssetDownload -AssetId ([Int64](Get-XqProperty -Object $checksumAsset -Name 'id' -Required)) -DestinationPath $checksumPart -ApiBaseUri $api -DownloadInvoker $DownloadInvoker
         if ((Get-Item -LiteralPath $installerPart).Length -ne [Int64](Get-XqProperty -Object $installerAsset -Name 'size' -Required)) { throw 'Downloaded installer size differs from the release metadata.' }
-        if ((Get-Item -LiteralPath $checksumPart).Length -ne [Int64](Get-XqProperty -Object $checksumAsset -Name 'size' -Required)) { throw 'Downloaded checksum size differs from the release metadata.' }
-        $officialInstallerHash = Get-XqChecksumEntry -ChecksumPath $checksumPart -AssetName 'OpenClawCompanion-Setup-x64.exe'
         $observedInstallerHash = Get-XqSha256 -Path $installerPart
-        if ($officialInstallerHash -cne $observedInstallerHash) { throw 'Candidate installer does not match the official checksum asset.' }
+        if ($officialDigest -cne $observedInstallerHash) { throw 'Candidate installer does not match the official GitHub asset digest.' }
         $signature = Get-XqSignatureSummary -Path $installerPart -SignatureInvoker $SignatureInvoker
         Assert-XqCandidateSignature -Signature $signature
         $licenseBytes = Get-XqSourceContent -CommitSha $commitSha -Path 'LICENSE' -ApiBaseUri $api -RequestInvoker $RequestInvoker
-        $noticeBytes = Get-XqSourceContent -CommitSha $commitSha -Path 'THIRD_PARTY_NOTICES.md' -ApiBaseUri $api -RequestInvoker $RequestInvoker
+        $noticeBytes = Get-XqSourceContent -CommitSha $commitSha -Path 'src/OpenClaw.Tray.WinUI/THIRD_PARTY_NOTICES.md' -ApiBaseUri $api -RequestInvoker $RequestInvoker
         $licensePath = Join-Path $work 'LICENSE'
         $noticePath = Join-Path $work 'THIRD_PARTY_NOTICES.md'
         [IO.File]::WriteAllBytes($licensePath, $licenseBytes)
@@ -79,14 +76,15 @@ try {
                 releaseId = $releaseId
                 draft = $false
                 prerelease = $false
-                publishedAtUtc = [string](Get-XqProperty -Object $release -Name 'published_at' -Required)
+                publishedAtUtc = $publishedAtUtc
                 htmlUrl = [string](Get-XqProperty -Object $release -Name 'html_url' -Required)
             }
             installer = [ordered]@{
                 assetId = [Int64](Get-XqProperty -Object $installerAsset -Name 'id' -Required)
                 name = 'OpenClawCompanion-Setup-x64.exe'
                 size = [Int64](Get-XqProperty -Object $installerAsset -Name 'size' -Required)
-                sha256 = $officialInstallerHash
+                sha256 = $officialDigest
+                officialDigestSha256 = $officialDigest
                 observedSha256 = $observedInstallerHash
                 signerSubject = [string](Get-XqProperty -Object $signature -Name 'SignerSubject' -Required)
                 signerThumbprint = [string](Get-XqProperty -Object $signature -Name 'SignerThumbprint' -Required)
@@ -94,14 +92,11 @@ try {
                 timestampPresent = [bool](Get-XqProperty -Object $signature -Name 'TimestampPresent' -Required)
                 timestampRequired = $true
             }
-            checksumAsset = [ordered]@{
-                assetId = [Int64](Get-XqProperty -Object $checksumAsset -Name 'id' -Required)
-                name = 'OpenClawCompanion-SHA256SUMS.txt'
-                sha256 = Get-XqSha256 -Path $checksumPart
-            }
             sourceFiles = [ordered]@{
                 commitSha = $commitSha.ToLowerInvariant()
+                licensePath = 'LICENSE'
                 licenseSha256 = Get-XqSha256 -Path $licensePath
+                thirdPartyNoticesPath = 'src/OpenClaw.Tray.WinUI/THIRD_PARTY_NOTICES.md'
                 thirdPartyNoticesSha256 = Get-XqSha256 -Path $noticePath
             }
             approval = [ordered]@{ status = 'pending-human-review'; approvedAtUtc = $null; approvedBy = $null }

@@ -27,7 +27,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $lock = Get-Content ./manifest/upstream-lock.json -Raw | ConvertFrom-Json
           if ($lock.approval.status -cne 'approved') { throw 'Formal build requires an approved upstream lock.' }
-          if ($lock.repository.owner -cne 'openclaw' -or $lock.repository.name -cne 'openclaw') { throw 'Unexpected upstream repository.' }
+          if ($lock.repository.owner -cne 'openclaw' -or $lock.repository.name -cne 'openclaw-windows-node' -or [int64]$lock.repository.repositoryId -ne 1144728715) { throw 'Unexpected upstream repository.' }
           if ($env:SOURCE_REF -notmatch '^[A-Fa-f0-9]{40}$') { throw 'Build must start from an immutable full commit SHA.' }
           if ((git rev-parse HEAD).Trim() -cne $env:SOURCE_REF.ToLowerInvariant()) { throw 'Resolved checkout SHA differs from requested immutable source ref.' }
       - name: Fetch and verify locked upstream artifacts

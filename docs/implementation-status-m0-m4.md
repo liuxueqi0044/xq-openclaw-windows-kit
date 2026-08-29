@@ -12,7 +12,7 @@ M0–M4 的源码实现已通过当前阶段验收，可以进入 M5–M10 开�
 |---|---|---|---|
 | M0 | 通过 | Win11 x64 唯一范围、Hub + managed WSL 主路径、schema、G1–G9、命令 allowlist、失败关闭 | 与 M5–M10 的持续一致性 |
 | M1 | 代码与离线集成通过 | 固定 repository ID、稳定版筛选、精确资产、candidate 不覆盖 approved lock、恶意 API URI 拒绝 | GitHub API 限流解除后的真实候选解析 |
-| M2 | 代码与离线集成通过 | approved lock、三方哈希、错误签名/时间戳、许可证、失败无 verified 输出 | 真实官方 EXE 的 Authenticode 与发布 checksum 正向验证 |
+| M2 | 代码与离线集成通过 | approved lock、GitHub asset.digest 与本地哈希、错误签名/时间戳、许可证、失败无 verified 输出 | 真实官方 EXE 的 Authenticode 与发布 asset.digest 正向验证 |
 | M3 | 通过 | 离线资源、五步入口、内部链接、无孤立页面、非官方/费用/凭据/售后/最小权限文案 | 固定上游版本后的界面截图与非技术用户走查 |
 | M4 | 通过（停止态路径） | 严格 allowlist、策略篡改拒绝、Hub/WSL/CLI 分层、停止态不启动 WSL、WinPS 5.1、CMD、超时、大输出、脱敏 | 已运行 managed WSL Gateway 内三个只读命令的 VM 验证 |
 
@@ -49,8 +49,7 @@ M0–M4 的源码实现已通过当前阶段验收，可以进入 M5–M10 开�
 
 1. M5 完整隐私与秘密 corpus；
 2. 人工批准的真实 `upstream-lock.json`；
-3. 真实上游安装器、官方 checksum、签名、LICENSE 和 notices 正向验证；
+3. 真实上游安装器、GitHub asset.digest、签名、LICENSE 和 notices 正向验证；
 4. M6–M8 的确定性打包、完整自动门和 CI；
 5. M9 全新 Windows 11 x64 VM 安装、对话、重启、诊断、卸载和 Defender 证据；
 6. M10 交付位 ZIP hash 与 VM 批准 hash 一致性。
-

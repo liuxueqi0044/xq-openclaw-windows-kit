@@ -34,7 +34,7 @@ This is an XQ validation scope, not a claim that upstream OpenClaw supports only
 
 Every official prerequisite that cannot be verified is `unverified`, not successful. `unverified` blocks release. Formal G1–G9 gate actions live in `policy/release-gates.json`; a successful build alone cannot authorize a listing or delivery.
 
-The approved upstream lock is the sole formal-build input. It fixes repository ID, release, assets, checksums, signer subject and thumbprint, and source-file hashes. `latest` aliases, unsigned artifacts, a different valid signer, missing timestamp/chain evidence, and GitHub API license metadata are not acceptable substitutes for the approved lock plus fixed-commit `LICENSE` and `THIRD_PARTY_NOTICES.md` verification.
+The approved upstream lock is the sole formal-build input. It fixes repository ID, release, assets, GitHub REST `asset.digest`, signer subject and thumbprint, and source-file hashes. `latest` aliases, unsigned artifacts, a different valid signer, missing timestamp/chain evidence, and GitHub API license metadata are not acceptable substitutes for the approved lock plus fixed-commit `LICENSE` and `src/OpenClaw.Tray.WinUI/THIRD_PARTY_NOTICES.md` verification.
 
 ## Diagnostic safety contract
 

@@ -7,14 +7,13 @@ BeforeAll {
     $script:fixtureRoot = Join-Path $script:kitRoot 'tests/Fixtures/m1m2'
     $script:lockPath = Join-Path $script:fixtureRoot 'approved-upstream-lock.json'
     $script:installerPath = Join-Path $script:fixtureRoot 'OpenClawCompanion-Setup-x64.exe'
-    $script:checksumPath = Join-Path $script:fixtureRoot 'OpenClawCompanion-SHA256SUMS.txt'
-    $script:validSignature = { param($Path) [pscustomobject]@{ Status = 'Valid'; SignerSubject = 'CN=XQ Fixture Signer'; SignerThumbprint = '00112233445566778899AABBCCDDEEFF00112233'; TimestampPresent = $true } }
+    $script:validSignature = { param($Path) [void]$Path; [pscustomobject]@{ Status = 'Valid'; SignerSubject = 'CN=XQ Fixture Signer'; SignerThumbprint = '00112233445566778899AABBCCDDEEFF00112233'; TimestampPresent = $true } }
     Import-Module (Join-Path $script:buildRoot 'SupplyChain.Common.psm1') -Force
 }
 
 Describe 'M2 official artifact verification' {
     It 'accepts three matching hashes and the approved signer' {
-        $result = & (Join-Path $script:buildRoot 'Verify-OfficialArtifact.ps1') -LockPath $script:lockPath -InstallerPath $script:installerPath -ChecksumPath $script:checksumPath -SignatureInvoker $script:validSignature
+        $result = & (Join-Path $script:buildRoot 'Verify-OfficialArtifact.ps1') -LockPath $script:lockPath -InstallerPath $script:installerPath -SignatureInvoker $script:validSignature
         $result.installerSha256 | Should -Be '6A58945C7AABAA87CAD1E75BD3ACDF93389028E165AAAFBB03413D62B7671668'
     }
 
