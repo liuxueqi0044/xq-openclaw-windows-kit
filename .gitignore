@@ -12,3 +12,11 @@ testResults*.xml
 .env
 .env.*
 candidate-lock.json
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.user
+*.suo
+*.swp
+*.orig
