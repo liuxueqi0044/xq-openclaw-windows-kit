@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "repository": {
+    "owner": "openclaw",
+    "name": "openclaw-windows-node",
+    "repositoryId": 1144728715
+  },
+  "release": {
+    "tag": "v2026.7.1",
+    "releaseId": 368287488,
+    "draft": false,
+    "prerelease": false,
+    "publishedAtUtc": "2026-08-11T01:42:05Z"
+  },
+  "installer": {
+    "assetId": 509502939,
+    "name": "OpenClawCompanion-Setup-x64.exe",
+    "size": 122306488,
+    "sha256": "0FAD205697DC92A020BE4C5809ECDF2F383258F5A54914922399787E1A4AFA1B",
+    "officialDigestSha256": "0FAD205697DC92A020BE4C5809ECDF2F383258F5A54914922399787E1A4AFA1B",
+    "signerSubject": "CN=OpenClaw Foundation, O=OpenClaw Foundation, L=Mill Valley, S=California, C=US",
+    "signerThumbprint": "74F0719953150F0B55D447D608D6A764A057BB55",
+    "timestampRequired": true
+  },
+  "sourceFiles": {
+    "commitSha": "4206611f2b2e47cd575e1c8aa94e3e7708f6dd96",
+    "licensePath": "LICENSE",
+    "licenseSha256": "E2BC86731271165CEAE2C2A80AA0F33FF399831662572ECDAFB7F3249F917AEB",
+    "thirdPartyNoticesPath": "src/OpenClaw.Tray.WinUI/THIRD_PARTY_NOTICES.md",
+    "thirdPartyNoticesSha256": "E5F18325B793BA59E70279FC778CEA919CA2A7E5A75878EA597722517A51D9DE"
+  },
+  "approval": {
+    "status": "approved",
+    "approvedAtUtc": "2026-08-29T04:00:56Z",
+    "approvedBy": "liuxueqi0044"
+  }
+}
